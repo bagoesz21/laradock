@@ -178,6 +178,10 @@ RUN if [ ${COMPOSER_REPO_PACKAGIST} ]; then \
 RUN echo "" >> ~/.bashrc && \
     echo 'export PATH="~/.composer/vendor/bin:$PATH"' >> ~/.bashrc
 
+# DEV
+RUN composer global require friendsofphp/php-cs-fixer
+RUN composer global require "squizlabs/php_codesniffer=*"
+
 ###########################################################################
 # Non-root user : PHPUnit path
 ###########################################################################
@@ -734,6 +738,9 @@ RUN if [ ${INSTALL_NODE} = true ]; then \
         ;fi \
         && ln -s `npm bin --global` /home/laradock/.node-bin \
 ;fi
+
+# DEV
+RUN npm install -g npm-check
 
 # Wouldn't execute when added to the RUN statement in the above block
 # Source NVM when loading bash since ~/.profile isn't loaded on non-login shell

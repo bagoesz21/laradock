@@ -740,7 +740,7 @@ RUN if [ ${INSTALL_NODE} = true ]; then \
 ;fi
 
 # DEV
-RUN npm install -g npm-check
+# RUN npm install -g npm-check
 
 # Wouldn't execute when added to the RUN statement in the above block
 # Source NVM when loading bash since ~/.profile isn't loaded on non-login shell

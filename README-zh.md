@@ -76,6 +76,9 @@ cp .env.example .env
 (1）配置DockerHub镜像加速，[链接](https://www.runoob.com/docker/docker-mirror-acceleration.html)   
 (2) 修改.env
 ```
+# Windows 设置
+COMPOSE_PATH_SEPARATOR=;
+DOCKER_SYNC_STRATEGY=unison
 # 开启ubuntu国内源
 CHANGE_SOURCE=true
 # composer镜像源
@@ -84,8 +87,23 @@ WORKSPACE_COMPOSER_REPO_PACKAGIST=https://mirrors.aliyun.com/composer/
 WORKSPACE_NVM_NODEJS_ORG_MIRROR=https://npmmirror.com/mirrors/node
 # npm镜像源
 WORKSPACE_NPM_REGISTRY=https://registry.npmmirror.com
+# 时区设置
+WORKSPACE_TIMEZONE=PRC
+# or
+# WORKSPACE_TIMEZONE=Asia/Shanghai
 ```
+(3) 修改其他容器的时区
+相关容器路径如下：
+- `.\laradock\php-worker\Dockerfile`
+- `.\laradock\mysql\Dockerfile`
 
+如有需要，请将上面各 `Dockerfile` 时区(china)修改成如下：
+
+```Dockerfile
+ARG TZ=PRC
+# or
+# ARG TZ=Asia/Shanghai
+```
 3. 运行这些容器。
 ```bash
 docker-compose up -d nginx mysql redis
@@ -98,7 +116,7 @@ docker-compose up -d nginx mysql redis
 <a name="features"></a>
 ### 特点
 
-- 在 PHP 版本：7.0，5.6.5.5...之中可以简单切换。
+- 在 PHP 版本：8.4，8.2,...，7.0，5.6.5.5...之中可以简单切换。
 - 可选择你最喜欢的数据库引擎，比如：MySQL, Postgres, MariaDB...
 - 可运行自己的软件组合，比如：Memcached, HHVM, Beanstalkd...
 - 所有软件运行在不同的容器之中，比如：PHP-FPM, NGINX, PHP-CLI...
@@ -179,7 +197,7 @@ Homestead 是一个工具,为你控制虚拟机(使用 Homestead 特殊命令)�
 ## 依赖
 
 - [Git](https://git-scm.com/downloads)       
-- [Docker](https://www.docker.com/products/docker/)
+- [Docker](https://www.docker.com/products/docker-desktop/)
 
 <a name="Installation"></a>
 ## 安装
@@ -205,9 +223,9 @@ git clone https://github.com/laradock/laradock.git
 
 **请在开始之前阅读:**
 如果你正在使用 **Docker Toolbox** (VM)，选择以下任何一个方法：
-- 更新到 Docker [Native](https://www.docker.com/products/docker) Mac/Windows 版本 (建议). 查看 [Upgrading Laradock](#upgrading-laradock)
+- 更新到 [Docker Desktop](https://www.docker.com/products/docker-desktop/) Mac/Windows 版本 (建议). 查看 [Upgrading Laradock](#upgrading-laradock)
 - 使用 Laradock v3.* (访问 `Laradock-ToolBox` [分支](https://github.com/laradock/laradock/tree/Laradock-ToolBox)).
-如果您使用的是 **Docker Native**(Mac / Windows 版本)甚至是 Linux 版本,通常可以继续阅读这个文档，Laradock v4 以上版本将仅支持 **Docker Native**。
+如果您使用的是 **Docker Desktop**(Mac / Windows 版本)甚至是 Linux 版本,通常可以继续阅读这个文档，Laradock v4 以上版本将仅支持 **Docker Desktop**。
 
 1 - 运行容器: *(在运行 `docker-compose` 命令之前，确认你在 `laradock` 目录中*
 
@@ -594,57 +612,15 @@ PHP-CLI 拓展应该安装到 `workspace/Dockerfile`.
 
 <a name="Change-the-PHP-FPM-Version"></a>
 ### 修改 PHP-FPM 版本
-默认运行 **PHP-FPM 7.0** 版本.
+默认运行 **PHP-FPM 8.3** 版本.
 
 >PHP-FPM 负责服务你的应用代码,如果你是计划运行您的应用程序在不同 PHP-FPM 版本上，则不需要更改 PHP-CLI 版本。
 
-#### A) 切换版本 PHP `7.0` 到 PHP `5.6`
-
-1 - 打开 `docker-compose.yml`。
-
-2 - 在PHP容器的 `Dockerfile-70` 文件。
-
-3 - 修改版本号, 用 `Dockerfile-56` 替换 `Dockerfile-70` , 例如:
-
-```txt
-php-fpm:
-    build:
-        context: ./php-fpm
-        dockerfile: Dockerfile-70
-```
-
-4 - 最后重建PHP容器
-
-```bash
-docker-compose build php
-```
-
-> 更多关于PHP基础镜像, 请访问 [PHP Docker官方镜像](https://hub.docker.com/_/php/).
-
-
-#### B) 切换版本 PHP `7.0` 或 `5.6` 到 PHP `5.5`
-我们已不在本地支持 PHP5.5，但是你按照以下步骤获取：
-
-1 - 克隆 `https://github.com/laradock/php-fpm`.
-
-2 - 重命名 `Dockerfile-56` 为 `Dockerfile-55`.
-
-3 - 编辑文件 `FROM php:5.6-fpm` 为 `FROM php:5.5-fpm`.
-
-4 - 从 `Dockerfile-55` 构建镜像.
-
-5 - 打开 `docker-compose.yml` 文件.
-
-6 - 将 `php-fpm` 指向你的 `Dockerfile-55` 文件.
-
-
-<a name="Change-the-PHP-CLI-Version"></a>
 ### 修改 PHP-CLI 版本
-默认运行 **PHP-CLI 7.0** 版本
+默认运行 **PHP-CLI 8.3** 版本
 
 >说明: PHP-CLI 只用于执行 Artisan 和 Composer 命令，不服务于你的应用代码，这是 PHP-FPM 的工作，所以编辑 PHP-CLI 的版本不是很重要。
 PHP-CLI 安装在 Workspace 容器，改变 PHP-CLI 版本你需要编辑 `workspace/Dockerfile`.
-现在你必须手动修改 PHP-FPM 的 `Dockerfile` 或者创建一个新的。 (可以考虑贡献功能).
 
 <a name="Install-xDebug"></a>
 ### 安装 xDebug
